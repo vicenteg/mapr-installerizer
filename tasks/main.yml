@@ -1,0 +1,46 @@
+---
+# tasks file for mapr-installerizer
+
+- name: copy installer definition and package
+  copy:
+    src: "{{item}}"
+    dest: /tmp
+  with_items:
+    - mapr-installer-1.4.201611161930-1.noarch.rpm
+    - mapr-installer-definitions-1.4.201611161930-1.noarch.rpm
+
+- name: copy installer setup script
+  copy:
+    src: mapr-setup.sh
+    dest: /tmp
+    mode: 0755
+
+- name: install installer
+  become: yes
+  become_user: root
+  shell: /tmp/mapr-setup.sh -i /tmp/mapr-installer-*.rpm -y
+  args:
+    creates: /opt/mapr/installer
+
+- name: copy private key
+  become: yes
+  become_user: root
+  copy:
+    src: "{{private_key_path}}"
+    dest: /tmp
+    mode: 0600
+    owner: "{{mapr_admin_user}}"
+
+- name: copy installer configuration file
+  become: yes
+  become_user: root
+  template:
+    src: installer-config.yaml.j2
+    dest: /tmp/installer-config.yaml
+    mode: 0600
+    owner: "{{mapr_admin_user}}"
+
+- name: install MapR!
+  become: yes
+  become_user: "{{mapr_admin_user}}"
+  command: /opt/mapr/installer/bin/mapr-installer-cli install -nvf -t /tmp/installer-config.yaml

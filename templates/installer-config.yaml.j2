@@ -1,0 +1,82 @@
+# --- Basic Silent installer template ---
+#DOC - indicates doc string
+#DOC 'Group_service' can be found with 'list services --type GROUP'
+#DOC 'Template_service' can be found with 'list services --type TEMPLATE'
+
+#DOC misc attributes
+environment:
+  #DOC mapr core version (required, must be 5.1.0 and above)
+  mapr_core_version: {{mapr_core_version}}
+
+#DOC attributes for /config api
+config:
+  #DOC list of hosts we want to install packages on (required)
+  #DOC installer host must be one of the hosts in this list
+  hosts:
+{% for host in groups['cluster'] %}
+    - {{host}}
+{% endfor %}
+  #DOC user id, must be present for every host defined above (required)
+  ssh_id: {{ssh_remote_user}}
+  #DOC Password based login (required, either this or private key based)
+  #DOC password to login to the machine via ssh
+  #ssh_password: mapr
+  #DOC Private key based login, uncomment ssh_method and ssh_key_file
+  #DOC path to a file that contains the private key
+  ssh_method: KEY
+  ssh_key_file: /tmp/{{private_key_path | basename}}
+  #DOC ssh port (optional)
+  #ssh_port: 22
+  #DOC license type (M3 = community edition, M5 = enterprise edition)
+  license_type: M5
+  #DOC MEP version (required only for Mapr 5.2.0 and above)
+  mep_version: {{mep_version}}
+  #DOC list of disks to install packages on (required)
+  disks:
+{% for disk in mapr_disks %}
+    - {{disk}}
+{% endfor %}
+  #DOC disk stripe width (optional)
+  #disk_stripe: 3
+  #DOC name of the cluster (required)
+  cluster_name: sample-cluster-y.mapr.com
+  #DOC elastic search path (optional)
+  #elasticsearch_path: /opt/mapr/es_db
+  #DOC hashmap of services to be installed (optional)
+  services:
+    #DOC Predefined template of services (without the version) -> 'Template_service'
+    template-05-converged:
+    #DOC name of an invidual service
+    #DOC It is recommended to add a 'Group_service'
+    mapr-hivemetastore:
+      #DOC (Optional) add a MySQL db, if the service requires it
+      #DOC By default, an embedded db is installed
+      database:
+        #schema name
+        name: hive
+        #user name for mysql
+        user: hive
+        #password for mysql
+        password: mapr
+        #hostname of an existing mysql instance
+        #host: your_host_name.your_company.com
+    #DOC To enable metrics add the following 3 services (only Mapr >= 5.2.0)
+    mapr-grafana:
+      #DOC enabled must be False, if list of opentsdb hosts are given below
+      #enabled: False
+    mapr-opentsdb:
+      #DOC Specifies list of hosts that already have opentsdb installed
+      #hosts: host1.domain.com, host2.domain.com
+      #DOC enabled must be False, if list of opentsdb hosts are given above
+      #enabled: False
+    mapr-collectd:
+    #DOC To enable logging, add the following 3 services (only Mapr >= 5.2.0)
+    #mapr-fluentd:
+    #mapr-kibana:
+      #DOC enabled must be False, if list of elasticsearch hosts are given below
+      #enabled: False
+    #mapr-elasticsearch:
+      #DOC Specifies list of hosts that already have elasticsearch installed
+      #hosts: host1.domain.com, host2.domain.com
+      #DOC enabled must be False, if list of elasticsearch hosts are given above
+      #enabled: False
