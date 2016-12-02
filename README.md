@@ -1,7 +1,7 @@
 mapr-installerizer
 =========
 
-A role to install the MapR installer, the install MapR.
+A role to install the MapR installer, then install MapR.
 
 Requirements
 ------------
