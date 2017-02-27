@@ -14,7 +14,7 @@ Ansible Requirements
 On CentOS 7, I do something like this:
 
 ```
-sudo yum -y install gcc make python-devel openssl-devel
+sudo yum -y install gcc make python-pip python-devel openssl-devel
 sudo pip install ansible
 git clone https://github.com/vicenteg/mapr-installerizer.git
 cd mapr-installerizer
@@ -23,15 +23,15 @@ cd mapr-installerizer
 Then for a single node cluster, generate a key you can use:
 
 ```
-ssh-keygen -t dsa -N "" -f ~/.ssh/id_dsa
-cat ~/.ssh/id_dsa.pub >> ~/.ssh/authorized_keys
+ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 chmod 0600 ~/.ssh/authorized_keys
 ```
 
 Create an inventory file:
 
 ```
-NODE=$(hostname)
+NODE=$(hostname -f)
 cat <<EOF >hosts
 [cluster]
 $NODE
